@@ -9,15 +9,15 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: uses: actions/checkout@v5
+        uses: actions/checkout@v5
 
       - name: Setup Python
-        uses: uses: actions/setup-java@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
       - name: Setup Java
-        uses: uses: actions/setup-python@v5
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
@@ -58,7 +58,8 @@ jobs:
 
       - name: Build APK
         run: |
-          export PATH="$ANDROID_HOME/build-tools/31.0.0:$PATH"
+          export ANDROID_HOME="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools/31.0.0:$PATH"
           buildozer android debug
 
       - name: Upload APK
@@ -66,3 +67,4 @@ jobs:
         with:
           name: password-checker-apk
           path: "bin/*.apk"
+          if-no-files-found: error
