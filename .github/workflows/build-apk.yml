@@ -41,6 +41,8 @@ jobs:
           pip3 install --upgrade buildozer cython==0.29.36
 
       - name: Build APK
+        env:
+          AA_USER_AGREED: "yes"
         run: |
           buildozer -v android debug
 
