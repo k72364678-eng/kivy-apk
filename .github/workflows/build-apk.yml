@@ -11,8 +11,31 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build with Buildozer
-        uses: ArtemSBulgakov/buildozer-action@v1
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          command: android debug
-          buildozer_version: master
+          python-version: "3.11"
+
+      - name: Install System Dependencies
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-setup git zlib1g-dev libncurses5-dev libncursesw5-dev \
+            libffi-dev libssl-dev libltdl-dev libtool automake autoconf \
+            unzip wget lld openjdk-17-jdk python3-pip cython3
+
+      - name: Install Buildozer
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade buildozer cython==0.29.36
+
+      - name: Build APK
+        run: |
+          yes | buildozer android debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: password-checker-apk
+          path: bin/*.apk
