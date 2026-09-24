@@ -22,7 +22,7 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Install dependencies
+      - name: Install Linux dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -30,6 +30,7 @@ jobs:
             zip \
             unzip \
             wget \
+            curl \
             openjdk-17-jdk \
             autoconf \
             libtool \
@@ -41,15 +42,32 @@ jobs:
             libffi-dev \
             libssl-dev
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Android SDK tools
+      - name: Install Android command line tools
         run: |
-          sdkmanager "platform-tools"
-          sdkmanager "platforms;android-31"
-          sdkmanager "build-tools;31.0.0"
+          mkdir -p "$HOME/android-sdk/cmdline-tools"
+          cd "$HOME/android-sdk"
+
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+
+          unzip -q commandlinetools-linux-11076708_latest.zip
+
+          mkdir -p cmdline-tools/latest
+          mv cmdline-tools/* cmdline-tools/latest/ 2>/dev/null || true
+
+          echo "ANDROID_HOME=$HOME/android-sdk" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> "$GITHUB_ENV"
+          echo "$HOME/android-sdk/platform-tools" >> "$GITHUB_PATH"
+          echo "$HOME/android-sdk/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          echo "$HOME/android-sdk/build-tools/35.0.0" >> "$GITHUB_PATH"
+
+      - name: Install Android SDK packages
+        run: |
           yes | sdkmanager --licenses || true
+
+          sdkmanager \
+            "platform-tools" \
+            "platforms;android-31" \
+            "build-tools;35.0.0"
 
       - name: Install Buildozer
         run: |
@@ -58,8 +76,12 @@ jobs:
 
       - name: Build APK
         run: |
-          export ANDROID_HOME="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
-          export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools/31.0.0:$PATH"
+          export ANDROID_HOME="$HOME/android-sdk"
+          export ANDROID_SDK_ROOT="$HOME/android-sdk"
+          export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/build-tools/35.0.0:$PATH"
+
+          yes | sdkmanager --licenses || true
+
           buildozer android debug
 
       - name: Upload APK
