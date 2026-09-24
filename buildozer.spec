@@ -1,47 +1,23 @@
-name: Build Android APK
+[app]
 
-on:
-  workflow_dispatch:
+title = Password Strength Checker
+package.name = passwordchecker
+package.domain = org.test
+source.dir = .
+source.include_exts = py,png,jpg,kv,atlas
+version = 0.1
+requirements = python3,kivy,pillow
+android.permissions = INTERNET
+orientation = portrait
+fullscreen = 0
+android.api = 33
+android.minapi = 21
+android.ndk = 25b
+android.sdk = 33
+android.androidx = True
+android.archs = arm64-v8a, armeabi-v7a
 
-jobs:
-  build:
-    runs-on: ubuntu-22.04
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Clear old buildozer cache to fix stubborn errors
-        run: |
-          rm -rf .buildozer
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install System Dependencies
-        run: |
-          sudo dpkg --add-architecture i386
-          sudo apt-get update
-          sudo apt-get install -y \
-            git zlib1g-dev libncurses5-dev libncursesw5-dev \
-            libffi-dev libssl-dev libltdl-dev libtool automake autoconf \
-            unzip wget lld openjdk-17-jdk python3-pip cython3
-
-      - name: Install Buildozer & Cython
-        run: |
-          pip3 install --upgrade pip
-          pip3 install --upgrade buildozer cython==0.29.36
-
-      - name: Force Accept Licenses & Build APK
-        env:
-          AA_USER_AGREED: "yes"
-        run: |
-          yes | buildozer -v android debug
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: package
-          path: bin/*.apk
+[buildozer]
+log_level = 2
+warn_on_root = 1
+bin_dir = ./bin
