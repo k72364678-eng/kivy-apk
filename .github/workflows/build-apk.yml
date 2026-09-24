@@ -11,15 +11,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Cache Buildozer directories
-        uses: actions/cache@v3
-        with:
-          path: |
-            .buildozer
-            ~/.buildozer
-          key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
-          restore-keys: |
-            ${{ runner.os }}-buildozer-
+      - name: Clear old buildozer cache to fix stubborn errors
+        run: |
+          rm -rf .buildozer
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -35,12 +29,12 @@ jobs:
             libffi-dev libssl-dev libltdl-dev libtool automake autoconf \
             unzip wget lld openjdk-17-jdk python3-pip cython3
 
-      - name: Install Buildozer
+      - name: Install Buildozer & Cython
         run: |
           pip3 install --upgrade pip
           pip3 install --upgrade buildozer cython==0.29.36
 
-      - name: Build APK
+      - name: Force Accept Licenses & Build APK
         env:
           AA_USER_AGREED: "yes"
         run: |
