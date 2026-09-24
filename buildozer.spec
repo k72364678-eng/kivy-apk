@@ -1,64 +1,47 @@
-[app]
+name: Build Android APK
 
-# (str) Title of your application
-title = Password Strength Checker
+on:
+  workflow_dispatch:
 
-# (str) Package name
-package.name = passwordchecker
+jobs:
+  build:
+    runs-on: ubuntu-22.04
 
-# (str) Package domain (needed for android packaging)
-package.domain = org.test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-# (str) Source directory where the app lives
-source.dir = .
+      - name: Clear old buildozer cache to fix stubborn errors
+        run: |
+          rm -rf .buildozer
 
-# (list) Source files to include (let it blank to include all files)
-source.include_exts = py,png,jpg,kv,atlas
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-# (list) List of inclusion/exclusion patterns
-source.include_patterns = assets/*,images/*.png
+      - name: Install System Dependencies
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y \
+            git zlib1g-dev libncurses5-dev libncursesw5-dev \
+            libffi-dev libssl-dev libltdl-dev libtool automake autoconf \
+            unzip wget lld openjdk-17-jdk python3-pip cython3
 
-# (str) Application versioning
-version = 0.1
+      - name: Install Buildozer & Cython
+        run: |
+          pip3 install --upgrade pip
+          pip3 install --upgrade buildozer cython==0.29.36
 
-# (list) Application requirements
-requirements = python3,kivy,pillow
+      - name: Force Accept Licenses & Build APK
+        env:
+          AA_USER_AGREED: "yes"
+        run: |
+          yes | buildozer -v android debug
 
-# (list) Permissions
-android.permissions = INTERNET
-
-# (list) Supported orientations
-orientation = portrait
-
-# (bool) Indicate if the application should be fullscreen or not
-fullscreen = 0
-
-# (list) Application android API to use
-android.api = 33
-
-# (list) Minimum API your APK will support
-android.minapi = 21
-
-# (str) Android NDK version to use ( Ye 25b sabse stable hai, aidl ka error nahi aayega )
-android.ndk = 25b
-
-# (str) Android SDK version to use
-android.sdk = 33
-
-# (bool) Use Android X
-android.androidx = True
-
-# (str) The Android arch to build for, in parallel
-android.archs = arm64-v8a, armeabi-v7a
-
-
-[buildozer]
-
-# (int) Log level (0 = error, 1 = info, 2 = debug (with command output))
-log_level = 2
-
-# (int) Display warning if buildozer is run as root (0 = False, 1 = True)
-warn_on_root = 1
-
-# (str) Path to build artifact, local or absolute
-bin_dir = ./bin
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: package
+          path: bin/*.apk
