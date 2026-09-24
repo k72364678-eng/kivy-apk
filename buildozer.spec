@@ -9,6 +9,9 @@ package.name = mykivyapp
 # (str) Package domain (needed for android packaging)
 package.domain = org.test
 
+# (str) Source directory where the app lives
+source.dir = .
+
 # (list) Source files to include (let it blank to include all files)
 source.include_exts = py,png,jpg,kv,atlas
 
@@ -19,7 +22,6 @@ source.include_patterns = assets/*,images/*.png
 version = 0.1
 
 # (list) Application requirements
-# (Make sure python3, kivy, and pillow are here)
 requirements = python3,kivy,pillow
 
 # (list) Custom source folders for dependencies
