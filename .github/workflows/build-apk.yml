@@ -29,10 +29,11 @@ jobs:
             libffi-dev libssl-dev libltdl-dev libtool automake autoconf \
             unzip wget lld openjdk-17-jdk python3-pip cython3
 
-      - name: Install Buildozer & Cython
+      - name: Install Buildozer & Fix Pip Version
         run: |
-          pip3 install --upgrade pip
-          pip3 install --upgrade buildozer cython==0.29.36
+          python -m pip install --upgrade pip
+          python -m pip install "pip<25"
+          python -m pip install --upgrade buildozer cython==0.29.36 python-for-android
 
       - name: Build APK
         env:
