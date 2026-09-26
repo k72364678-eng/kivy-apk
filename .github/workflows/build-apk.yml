@@ -16,7 +16,7 @@ jobs:
           rm -rf .buildozer
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/python-setup@v5
         with:
           python-version: "3.11"
 
