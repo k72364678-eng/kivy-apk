@@ -11,12 +11,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Clear old buildozer cache to fix stubborn errors
+      - name: Clear old buildozer cache
         run: |
           rm -rf .buildozer
 
       - name: Set up Python
-        uses: actions/python-setup@v5
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
@@ -34,16 +34,8 @@ jobs:
           pip3 install --upgrade pip
           pip3 install --upgrade buildozer cython==0.29.36
 
-      - name: Force Accept Licenses & Build APK
+      - name: Build APK
         env:
           AA_USER_AGREED: "yes"
         run: |
           yes | buildozer android debug
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: package
-          path: bin/*.apk
-          name: package
-          path: bin/*.apk
